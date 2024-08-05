@@ -35,7 +35,7 @@ describe('CommsService', () => {
         title: 'Your next delivery for Fern and Alejandra',
         message:
           "Hey Monica! In two days' time, we'll be charging you for your next order for Fern and Alejandra's fresh food.",
-        totalPrice: 69.0 + 66.0,
+        totalPrice: 135,
       });
     });
 

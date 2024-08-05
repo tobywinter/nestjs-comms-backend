@@ -39,6 +39,7 @@ export class CommsService {
 
   yourNextDelivery(id: string): YourNextDeliveryResponse {
     const user = this.usersService.findOne(id);
+
     const product = this.productsService.findOne(user?.cats[0].pouchSize);
 
     if (user) {
