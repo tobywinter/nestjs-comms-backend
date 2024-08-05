@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { YourNextDeliveryResponse } from './interfaces/comms.interface';
 import { UsersService } from '../users/users.service';
 import { ProductsService } from '../products/products.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 
 @Injectable()
 export class CommsService {
   constructor(
     private usersService: UsersService,
     private productsService: ProductsService,
+    private subscriptionsService: SubscriptionsService,
   ) {}
 
   private formatCatNames(cats: { name: string }[]): string {
@@ -39,14 +41,23 @@ export class CommsService {
 
   yourNextDelivery(id: string): YourNextDeliveryResponse {
     const user = this.usersService.findOne(id);
-
-    const product = this.productsService.findOne(user?.cats[0].pouchSize);
+    const activeSubscriptions =
+      this.subscriptionsService.getActiveSubscriptions(user);
+    const totalPrice = activeSubscriptions.reduce((acc, subscription) => {
+      const product = this.productsService.findOne(subscription.pouchSize);
+      return acc + product.price.amount;
+    }, 0);
 
     if (user) {
       return {
-        title: 'Your next delivery for ' + this.formatCatNames(user.cats),
-        message: this.formatNextDeliveryMessage(user),
-        totalPrice: product.price.amount,
+        title:
+          'Your next delivery for ' + this.formatCatNames(activeSubscriptions),
+        message: this.formatNextDeliveryMessage({
+          ...user,
+          cats: activeSubscriptions,
+        }),
+        totalPrice: totalPrice,
+        freeGift: totalPrice > 120,
       };
     }
 
