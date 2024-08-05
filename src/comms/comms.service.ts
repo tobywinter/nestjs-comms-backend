@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { YourNextDeliveryResponse } from './interfaces/comms.interface';
 import { UsersService } from '../users/users.service';
-import { ProductsService } from '../products/products.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 
 @Injectable()
 export class CommsService {
   constructor(
     private usersService: UsersService,
-    private productsService: ProductsService,
     private subscriptionsService: SubscriptionsService,
   ) {}
 
@@ -43,11 +41,8 @@ export class CommsService {
     const user = this.usersService.findOne(id);
     const activeSubscriptions =
       this.subscriptionsService.getActiveSubscriptions(user);
-    const totalPrice = activeSubscriptions.reduce((acc, subscription) => {
-      const product = this.productsService.findOne(subscription.pouchSize);
-      return acc + product.price.amount;
-    }, 0);
-
+    const totalPrice =
+      this.subscriptionsService.getMonthlyReccuringPrice(user).amount;
     if (user) {
       return {
         title:
